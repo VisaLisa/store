@@ -8,3 +8,6 @@ from models
 
 app = Flask(__name__)
 toolbar = DebugToolbarExtension(app)
+
+app.config ['SQLALCHEMY_DATABASE_URI'] = ('postgres:///lisastore')
+db = SQLAlchemy(app)
