@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h1>Product Lists</h1>
+
+<div class="row product-listing">
+
+  {% for product in products %}
+    <div>
+  <!-- product.id, product.status -->
+    </div>
+  {% else %}
+  <div class="col-12">No products in store.</div>
+  {% endfor %}
+
+</div>
+
+<a class="btn btn-primary" href="{{ url_for('add_pet') }}">Add a Pet</a>
+
+{% endblock %}
