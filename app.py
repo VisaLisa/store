@@ -1,7 +1,7 @@
 import os
-# import stripe
+import stripe
 
-from flask import Flask, jsonify, render_template
+from flask import Flask, jsonify, render_template, url_for
 from flask_debugtoolbar import DebugToolbarExtension
 from flask_sqlalchemy import SQLAlchemy
 
@@ -9,23 +9,52 @@ from forms import AddProductForm
 from models import db, connect_db, Product
 
 app = Flask(__name__)
-toolbar = DebugToolbarExtension(app)
-app.config['SECRET_KEY'] = "stuffthings"
-app.config ['SQLALCHEMY_DATABASE_URI'] = 'postgres:///lisastore'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-# app.config['STRIPE_PUBLIC_KEY'] = 'pk_test_51IdJOfLr6dKpoHJsWZmDW1ImIVKAreVf0GhQDzfTT74uiNGeR2Pd42ZzFOHIJ4Al1PmZMU54btPNINuFbbsve5SP00ynr27tFh'
+# Ensure that debug mode is *on*
+app.debug = True
 
-# stripe.api_key = app.config['STRIPE_SECRET_KEY'] = 'sk_test_51IdJOfLr6dKpoHJs2lQ0qg5DYKkmBSsnPlpiL393r4pN0YKqN0p1dpAf0X0VGJbjSXWjy027R7foLtBJLewEAvjq00M1PmdOqC'
+# Enable flask session cookies
+app.config['SECRET_KEY'] = 'key'
+
+toolbar = DebugToolbarExtension(app)
+
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql:///lisastore'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+app.config['STRIPE_PUBLIC_KEY'] = 'pk_test_51IdJOfLr6dKpoHJsWZmDW1ImIVKAreVf0GhQDzfTT74uiNGeR2Pd42ZzFOHIJ4Al1PmZMU54btPNINuFbbsve5SP00ynr27tFh'
+app.config['STRIPE_SECRET_KEY'] = 'sk_test_51IdJOfLr6dKpoHJs2lQ0qg5DYKkmBSsnPlpiL393r4pN0YKqN0p1dpAf0X0VGJbjSXWjy027R7foLtBJLewEAvjq00M1PmdOqC'
+stripe.api_key = app.config['STRIPE_SECRET_KEY']
 
 
 connect_db(app)
-db.create_all()
 
 
 @app.route("/")
-def homepage():
+def index():
     """Show homepage - show product list"""
-    return render_template("index.html")
+    
+    return render_template('index.html')
+    
+@app.route('/stripe_pay')
+def stripe_pay():
+    session = stripe.checkout.Session.create(
+    payment_method_types=['card'],
+    line_items=[{
+      'price': 'price_1IdLSZLr6dKpoHJsWmIKoitx',
+      'quantity': 1,
+    }],
+    mode='payment',
+    success_url=url_for('thanks', _external=True) + '?session_id={CHECKOUT_SESSION_ID}',
+    cancel_url=url_for('index', _external=True),
+    )
+    return {
+        'checkout_session_id': session['id'], 
+        'checkout_public_key': app.config['STRIPE_PUBLIC_KEY']
+        }
+
+
+@app.route("/thanks")
+def thanks():
+    return render_template("thanks.html")
 
 # TODO: product page - add, delete, edit
 # @app.route('/products')

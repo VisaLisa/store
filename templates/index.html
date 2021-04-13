@@ -2,4 +2,19 @@
 
 {% block content %}
 
+<title>Lisa's Store</title>
+
+<div class="container">
+    <div class="jumbotron">
+        <h1 class="display-3">Cheese Plate</h1>
+        <p class="lead">Purchase cheese plate for only $8.50.</p>
+        <a href="#" id="buy_now_btn" class="btn btn-primary">Buy Now</a>
+      </div>
+</div>
+
+<footer class="footer">
+    <script src="https://js.stripe.com/v3/"></script>
+    <script src="{{ url_for('static', filename='script-ajax.js') }}"></script>
+</footer>
+
 {% endblock %}
